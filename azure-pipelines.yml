@@ -3,8 +3,9 @@ trigger:
 
 variables:
   buildConfiguration: 'Release'
-  projectPath: 'MyApp.csproj'   # <-- change to 'MyApp/MyApp.csproj' if needed
+  projectPath: 'MyApp.csproj'   # <-- update if your csproj is in a subfolder
   artifactName: 'drop'
+  nugetCacheFolder: '$(Pipeline.Workspace)/.nuget/packages'  # concrete cache path
 
 pool:
   name: 'Default'
@@ -16,6 +17,7 @@ steps:
   - script: |
       echo Agent: $(Agent.Name)
       echo Sources: $(Build.SourcesDirectory)
+      echo Pipeline workspace: $(Pipeline.Workspace)
       dir /b
     displayName: 'Debug: list repo root files'
 
@@ -26,22 +28,37 @@ steps:
       version: '8.x'
       includePreview: false
 
+  # Ensure the cache folder exists and is writable
+  - script: |
+      echo "Creating NuGet cache folder: $(nugetCacheFolder)"
+      mkdir "%(nugetCacheFolder)%"
+    displayName: 'Prepare NuGet cache folder'
+    # On Windows agents the mkdir above uses cmd; ensure variable expansion works
+    shell: cmd
+
   - task: Cache@2
     displayName: 'Cache NuGet packages (safe)'
     inputs:
       key: 'nuget | "$(Agent.OS)" | **/*.csproj'
       restoreKeys: |
         nuget | "$(Agent.OS)"
-      path: $(NUGET_PACKAGES)
+      path: '$(nugetCacheFolder)'
 
+  # Use the repo-local cache folder for restore by setting NUGET_PACKAGES env
   - script: dotnet restore $(projectPath)
     displayName: 'Restore NuGet packages'
+    env:
+      NUGET_PACKAGES: '$(nugetCacheFolder)'
 
   - script: dotnet build $(projectPath) --configuration $(buildConfiguration) --no-restore --verbosity minimal
     displayName: 'Build'
+    env:
+      NUGET_PACKAGES: '$(nugetCacheFolder)'
 
   - script: dotnet publish $(projectPath) -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory) --no-build
     displayName: 'Publish to artifact staging directory'
+    env:
+      NUGET_PACKAGES: '$(nugetCacheFolder)'
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish artifact'
