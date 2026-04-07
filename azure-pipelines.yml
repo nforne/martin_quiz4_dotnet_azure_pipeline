@@ -3,7 +3,7 @@ trigger:
 
 variables:
   buildConfiguration: 'Release'
-  projectPath: 'MyApp.csproj'   # <-- update if your csproj is in a subfolder
+  projectPath: 'MyApp.csproj'            # <-- update if your .csproj is in a subfolder (e.g. 'MyApp/MyApp.csproj')
   artifactName: 'drop'
   nugetCacheFolder: '$(Pipeline.Workspace)/.nuget/packages'  # concrete cache path
 
@@ -28,13 +28,18 @@ steps:
       version: '8.x'
       includePreview: false
 
-  # Ensure the cache folder exists and is writable
-  - script: |
-      echo "Creating NuGet cache folder: $(nugetCacheFolder)"
-      mkdir "%(nugetCacheFolder)%"
+  - task: PowerShell@2
     displayName: 'Prepare NuGet cache folder'
-    # On Windows agents the mkdir above uses cmd; ensure variable expansion works
-    shell: cmd
+    inputs:
+      targetType: 'inline'
+      script: |
+        $path = "$(nugetCacheFolder)"
+        if (-not (Test-Path $path)) {
+          New-Item -ItemType Directory -Force -Path $path | Out-Null
+          Write-Host "Created NuGet cache folder: $path"
+        } else {
+          Write-Host "NuGet cache folder already exists: $path"
+        }
 
   - task: Cache@2
     displayName: 'Cache NuGet packages (safe)'
@@ -44,7 +49,6 @@ steps:
         nuget | "$(Agent.OS)"
       path: '$(nugetCacheFolder)'
 
-  # Use the repo-local cache folder for restore by setting NUGET_PACKAGES env
   - script: dotnet restore $(projectPath)
     displayName: 'Restore NuGet packages'
     env:
