@@ -48,7 +48,7 @@
               "RelativeDocumentMoniker": "azure-pipelines.yml",
               "ToolTip": "C:\\Users\\Safe2Q\\Desktop\\test\\martin_quiz4_dotnet_azure_pipeline\\azure-pipelines.yml",
               "RelativeToolTip": "azure-pipelines.yml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC0AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003775|",
               "WhenOpened": "2026-04-07T18:05:43.581Z",
               "EditorCaption": ""
@@ -75,8 +75,7 @@
               "RelativeToolTip": "Views\\Home\\Index.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-04-07T17:31:24.64Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-07T17:31:24.64Z"
             },
             {
               "$type": "Document",

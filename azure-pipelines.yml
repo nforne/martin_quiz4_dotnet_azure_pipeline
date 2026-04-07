@@ -3,7 +3,7 @@ trigger:
 
 variables:
   buildConfiguration: 'Release'
-  projectPath: 'MyApp.csproj'   # change if your .csproj is in a subfolder, e.g. 'MyApp/MyApp.csproj'
+  projectPath: 'MyApp.csproj'   # <-- change to 'MyApp/MyApp.csproj' if needed
   artifactName: 'drop'
 
 pool:
@@ -13,6 +13,12 @@ steps:
   - checkout: self
     clean: true
 
+  - script: |
+      echo Agent: $(Agent.Name)
+      echo Sources: $(Build.SourcesDirectory)
+      dir /b
+    displayName: 'Debug: list repo root files'
+
   - task: UseDotNet@2
     displayName: 'Use .NET SDK 8.x'
     inputs:
@@ -21,9 +27,9 @@ steps:
       includePreview: false
 
   - task: Cache@2
-    displayName: 'Cache NuGet packages'
+    displayName: 'Cache NuGet packages (safe)'
     inputs:
-      key: 'nuget | "$(Agent.OS)" | **/packages.lock.json'
+      key: 'nuget | "$(Agent.OS)" | **/*.csproj'
       restoreKeys: |
         nuget | "$(Agent.OS)"
       path: $(NUGET_PACKAGES)
