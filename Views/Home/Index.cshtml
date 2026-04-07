@@ -1,0 +1,17 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    ViewData["DbMessage"] = "Database access has already been done on April 6, 2026 by Martin";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+
+    @if (ViewData["DbMessage"] != null)
+    {
+    <div class="alert alert-info">
+        @ViewData["DbMessage"]
+    </div>
+    }
+
+    <p>Learn about <a href="https://microsoft.com">building Web apps with ASP.NET Core</a>.</p>
+</div>
