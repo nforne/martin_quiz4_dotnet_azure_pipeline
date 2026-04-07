@@ -1,27 +1,45 @@
 trigger:
   - main
 
+variables:
+  buildConfiguration: 'Release'
+  projectPath: 'MyApp.csproj'   # change if your .csproj is in a subfolder, e.g. 'MyApp/MyApp.csproj'
+  artifactName: 'drop'
+
 pool:
   name: 'Default'
 
 steps:
   - checkout: self
+    clean: true
 
   - task: UseDotNet@2
+    displayName: 'Use .NET SDK 8.x'
     inputs:
       packageType: 'sdk'
       version: '8.x'
+      includePreview: false
 
-  - script: dotnet restore MyApp.csproj
-    displayName: Restore
+  - task: Cache@2
+    displayName: 'Cache NuGet packages'
+    inputs:
+      key: 'nuget | "$(Agent.OS)" | **/packages.lock.json'
+      restoreKeys: |
+        nuget | "$(Agent.OS)"
+      path: $(NUGET_PACKAGES)
 
-  - script: dotnet build MyApp.csproj --configuration Release
-    displayName: Build
+  - script: dotnet restore $(projectPath)
+    displayName: 'Restore NuGet packages'
 
-  - script: dotnet publish MyApp.csproj -c Release -o $(Build.ArtifactStagingDirectory)
-    displayName: Publish
+  - script: dotnet build $(projectPath) --configuration $(buildConfiguration) --no-restore --verbosity minimal
+    displayName: 'Build'
+
+  - script: dotnet publish $(projectPath) -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory) --no-build
+    displayName: 'Publish to artifact staging directory'
 
   - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifact'
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: 'drop'
+      ArtifactName: '$(artifactName)'
+      publishLocation: 'Container'
