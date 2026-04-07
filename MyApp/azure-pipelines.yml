@@ -5,18 +5,20 @@ pool:
   name: 'Default'
 
 steps:
+  - checkout: self
+
   - task: UseDotNet@2
     inputs:
       packageType: 'sdk'
       version: '8.x'
 
-  - script: dotnet restore
+  - script: dotnet restore MyApp.csproj
     displayName: Restore
 
-  - script: dotnet build --configuration Release
+  - script: dotnet build MyApp.csproj --configuration Release
     displayName: Build
 
-  - script: dotnet publish -c Release -o $(Build.ArtifactStagingDirectory)
+  - script: dotnet publish MyApp.csproj -c Release -o $(Build.ArtifactStagingDirectory)
     displayName: Publish
 
   - task: PublishBuildArtifacts@1
